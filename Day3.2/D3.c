@@ -10,6 +10,8 @@
 
 typedef struct vector{
   int sX,sY,eX,eY;
+  int stepsTo;
+  int size;
 }vector;
 
 
@@ -28,7 +30,10 @@ int intersect(vector A, vector B){
       printf("sX: %d, sY: %d,      eX: %d, eY: %d\n",A.sX,A.sY,A.eX,A.eY);
       printf("sX: %d, sY: %d,      eX: %d, eY: %d\n",B.sX,B.sY,B.eX,B.eY);
       //a's X b's Y
-      return abs(A.sX - 1000) + abs(B.sY - 1000);
+      //return abs(A.sX - 1000) + abs(B.sY - 1000);
+
+      printf("Asteps: %d-%d, Bsteps: %d-%d\n",A.stepsTo+A.size,abs(A.eX-B.eX),B.stepsTo+B.size,abs(A.eY-B.eY));
+      return A.stepsTo + B.stepsTo + A.size + B.size - (  abs(A.eX - B.eX) + abs(A.eY - B.eY) );
     }
   }
 
@@ -39,14 +44,19 @@ int intersect(vector A, vector B){
       printf("sX: %d, sY: %d,      eX: %d, eY: %d\n",A.sX,A.sY,A.eX,A.eY);
       printf("sX: %d, sY: %d,      eX: %d, eY: %d\n",B.sX,B.sY,B.eX,B.eY);
       //b's X a's Y
-      return abs(B.sX - 1000) + abs(A.sY - 1000);
+      //return abs(B.sX - 1000) + abs(A.sY - 1000);
+
+      printf("Asteps: %d-%d, Bsteps: %d-%d\n",A.stepsTo+A.size,abs(A.eY-B.eY),B.stepsTo+B.size,abs(A.eX-B.eX));
+      return A.stepsTo + B.stepsTo + A.size + B.size - (  abs(A.eX - B.eX) + abs(A.eY - B.eY) );
     }
   }
 
   return -1;
 }
 
+
 int main(){
+  //printf("1\n");
   char** inputLines;
   char** lineA;
   int lineASize;
@@ -59,14 +69,14 @@ int main(){
   int horPosB = 1000;
   int vertPosB = 1000;
 
-  int distance = -1;
-  int lowestDistance = -1;
+  int steps = -1;
+  int smallestSteps = -1;
 
   char tempNum[10];
   int addNum = 0;
 
-
   numLines = readFile(&inputLines, "D3.txt");
+//  printf("2\n");
 
   /*for(int i = 0; i < numLines; i++){
     printf("%s\n",inputLines[i]);
@@ -77,12 +87,28 @@ int main(){
   lineASize = strsplt(1, &lineA, inputLines[0], ',');
   vector* vA = malloc(sizeof(vector)*lineASize);
 
+//  printf("3 %d\n",lineASize);
+
   //Set up A's vectors
   for(int i = 0; i < lineASize; i++){
 
-   strncpy(tempNum, lineA[i] + 1, strlen(lineA[i]) - 1);
+    //printf("4 %d\n",i);
+   strncpy(tempNum, lineA[i] + 1, strlen(lineA[i]));
     tempNum[strlen(lineA[i])-1] = '\0';
     addNum = atoi(tempNum);
+
+    vA[i].size = addNum;
+
+    if(i > 0){
+      vA[i].stepsTo = vA[i-1].stepsTo + vA[i-1].size;
+      printf("%d = %d + %d\n",vA[i].stepsTo,vA[i-1].stepsTo,vA[i-1].size);
+      printf("Size:%d StepsTo:%d\n\n\n",vA[i].size, vA[i].stepsTo);
+    }
+    else{
+      vA[i].stepsTo = 0;
+      printf("Size:%d StepsTo:%d\n\n\n",vA[i].size, vA[i].stepsTo);
+    }
+
 
     if(lineA[i][0] == 'U'){
 
@@ -130,7 +156,7 @@ int main(){
     }
   }
 
-
+//  printf("5\n");
 
   //Set up B's vectors
   lineBSize = strsplt(1, &lineB, inputLines[1], ',');
@@ -138,10 +164,25 @@ int main(){
 
   //Set up vectors
   for(int i = 0; i < lineBSize; i++){
-
-    strncpy(tempNum, lineB[i] + 1, strlen(lineB[i]) - 1);
+    //printf("6 %d %s\n",i, tempNum);
+    strncpy(tempNum, lineB[i] + 1, strlen(lineB[i]));
+    //printf("7 %d %s\n",i,tempNum);
     tempNum[strlen(lineB[i])-1] = '\0';
     addNum = atoi(tempNum);
+
+    vB[i].size = addNum;
+
+    if(i > 0){
+      vB[i].stepsTo = vB[i-1].stepsTo + vB[i-1].size;
+      printf("%d = %d + %d\n",vB[i].stepsTo,vB[i-1].stepsTo,vB[i-1].size);
+      printf("Size:%d StepsTo:%d\n\n\n",vB[i].size, vB[i].stepsTo);
+    }
+    else{
+      vB[i].stepsTo = 0;
+      printf("Size:%d StepsTo:%d\n\n\n",vB[i].size, vB[i].stepsTo);
+    }
+
+    vB[i].size = addNum;
 
     if(lineB[i][0] == 'U'){
 
@@ -191,6 +232,14 @@ int main(){
   }
 
 
+  for(int i = 0; i < lineASize; i++){
+    //printf("sX: %d, sY: %d,      eX: %d, eY: %d -- StepsTo: %d, Size: %d\n",vA[i].sX,vA[i].sY,vA[i].eX,vA[i].eY,vA[i].stepsTo,vA[i].size);
+  }
+  printf("\n\n");
+
+  for(int i = 0; i < lineBSize; i++){
+    //printf("sX: %d, sY: %d,      eX: %d, eY: %d -- StepsTo: %d, Size: %d\n",vB[i].sX,vB[i].sY,vB[i].eX,vB[i].eY,vB[i].stepsTo,vA[i].size);
+  }
 
   for(int i = 0; i < lineASize; i++){
     //printf("A VECTOR:    sX: %d, sY: %d,      eX: %d, eY: %d\n",vA[i].sX,vA[i].sY,vA[i].eX,vA[i].eY);
@@ -198,18 +247,18 @@ int main(){
     for(int j = 0; j < lineBSize; j++){
       //printf("B VECTOR:     sX: %d, sY: %d,      eX: %d, eY: %d\n",vB[j].sX,vB[j].sY,vB[j].eX,vB[j].eY);
 
-      distance = intersect(vA[i], vB[j]);
-      if(distance > 0){
-        printf("Distance: %d\n",distance);
-        if(distance < lowestDistance || lowestDistance == -1){
-          lowestDistance = distance;
+      steps = intersect(vA[i], vB[j]);
+      if(steps > 0){
+        printf("Steps: %d\n",steps);
+        if(steps < smallestSteps || smallestSteps == -1){
+          smallestSteps = steps;
         }
       }
 
     }
   }
 
-  printf("Closest Distance: %d\n", lowestDistance);
+  printf("Fewest steps: %d\n", smallestSteps);
 
 
 }
